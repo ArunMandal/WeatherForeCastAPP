@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Add a Map with Dynamic Markers using Google Maps JavaScript API</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <style>
+
+        .weather-card {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+            .weather-card h3 {
+                margin-top: 0;
+            }
+
+            .weather-card .weather-icon {
+                width: 50px;
+                height: 50px;
+            }
+
+        .weather-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .weather-col {
+            flex: 1;
+            padding: 5px;
+        }
+        /* Set the size of the div element that contains the map */
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="weather-container"></div> 
+    
+    <script>
+        let map;
+        let markers = [];
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 43.4142989, lng: -124.2301242 },
+                zoom: 4,
+            });
+
+            // This event listener will call addMarker() when the map is clicked.
+            map.addListener("click", (event) => {
+                addMarker(event.latLng);
+                callController(event.latLng.lat(), event.latLng.lng());
+            });
+
+            // Adds a marker at the center of the map.
+            addMarker({ lat: 43.4142989, lng: -124.2301242 });
+        }
+
+        // Adds a marker to the map and push to the array.
+        function addMarker(location) {
+
+            const marker = new google.maps.Marker({
+                position: location,
+                map: map,
+            });
+            console.log(markers);
+            deleteMarkers();
+            markers.push(marker);
+        }
+
+        // Sets the map on all markers in the array.
+        function setMapOnAll(map) {
+            for (let i = 0; i < markers.length; i++) {
+                markers[i].setMap(map);
+            }
+        }
+
+        // Removes the markers from the map, but keeps them in the array.
+        function clearMarkers() {
+            setMapOnAll(null);
+        }
+
+        // Shows any markers currently in the array.
+        function showMarkers() {
+            setMapOnAll(map);
+        }
+
+        // Deletes all markers in the array by removing references to them.
+        function deleteMarkers() {
+            clearMarkers();
+            markers = [];
+        }
+
+
+        // Function to call your controller with the latitude and longitude
+        //function callController(lat, lng) {
+        //    // Modify the URL to your controller's endpoint
+        //    fetch('/api/weather/add', {
+        //        method: 'POST', // or 'PUT'
+        //        headers: {
+        //            'Content-Type': 'application/json',
+        //        },
+        //        body: JSON.stringify({ latitude: lat, longitude: lng }),
+        //    })
+        //        .then(response => response.json())
+        //        .then(data => {
+        //            console.log('Success:', data);
+        //        })
+        //        .catch((error) => {
+        //            console.error('Error:', error);
+        //        });
+        //}
+
+
+        function callController(lat, lng) {
+            fetch('/Weather/GetWeatherForecast', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ latitude: lat, longitude: lng }),
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Network response was not ok.');
+                    }
+                })
+                .then(data => {
+                    console.log(data.forecast);
+                    renderWeatherCards(data.forecast.periods)             
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function renderWeatherCards(data) {
+            const container = document.getElementById('weather-container');
+            container.innerHTML = '';
+
+            data.forEach(weather => {
+                const card = document.createElement('div');
+                card.classList.add('weather-card');
+
+                const row = document.createElement('div');
+                row.classList.add('weather-row');
+
+                row.innerHTML = `
+                                    <div class="weather-col">
+                                        <h3>${weather.name}</h3>
+                                    </div>
+                                    <div class="weather-col">
+                                        <p><strong>Condition:</strong> ${weather.forecastShort}</p>
+                                    </div>
+                                    <div class="weather-col">
+                                        <p><strong>Temperature:</strong> ${weather.temperatureInFahrenheit}°</p>
+                                    </div>
+                                            <div class="weather-col">
+                                                        <p><strong>Wind Direction:</strong> ${weather.windDirection}</p>
+                                            </div>
+                                    <div class="weather-col">
+                                        <p><strong>Wind Speed:</strong> ${weather.windSpeed} mph</p>
+                                    </div>
+                                `;
+
+                card.appendChild(row);
+                container.appendChild(card);
+            });
+        }
+
+
+
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCO-vNni9H4sbGr2k8VBelcMO7SAqqK_ac&callback=initMap"></script>
+
+</body>
+</html>
