@@ -1,11 +1,15 @@
 using WeatherForecastBusiness.Services;
+using WeatherForecastBusiness.Services.LogService;
+using WeatherForecastBusiness.Services.WeatherServices;
+using WeatherForecastData.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddScoped<WeatherService>();
+builder.Services.AddScoped<IWeatherService, WeatherService>();
+builder.Services.AddScoped<IWebRequestLogService<WebRequestLog>, WebRequestLogService>();
 
 var app = builder.Build();
 

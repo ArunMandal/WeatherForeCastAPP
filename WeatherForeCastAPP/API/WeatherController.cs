@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WeatherForecastBusiness.Services;
+using WeatherForecastBusiness.Services.WeatherServices;
 using WeatherForecastData.Model;
 
 namespace WeatherForeCastAPP.API

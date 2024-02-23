@@ -9,9 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 using WeatherForecastData.Model;
 
-namespace WeatherForecastBusiness.Services
+namespace WeatherForecastBusiness.Services.WeatherServices
 {
-    public class WeatherService
+    public class WeatherService: IWeatherService
     {
         private readonly HttpClient _httpClient;
        
