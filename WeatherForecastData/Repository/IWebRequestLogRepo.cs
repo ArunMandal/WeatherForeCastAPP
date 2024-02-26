@@ -7,7 +7,7 @@ using WeatherForecastData.Model;
 
 namespace WeatherForecastData.Repository
 {
-    internal interface IWebRequestLogRepo
+    public interface IWebRequestLogRepo
     {
         public Task SaveWebRequestLog(WebRequestLog log);
     }

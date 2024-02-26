@@ -6,27 +6,43 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WeatherForecastData.ConnectionString;
 using WeatherForecastData.Model;
 
 namespace WeatherForecastData.Repository
 {
-    internal class WebRequestLogRepo : IWebRequestLogRepo
+    public class WebRequestLogRepo : IWebRequestLogRepo
     {
+        private readonly IConnectionStringProvider _connectionStringProvider;
+
+        public WebRequestLogRepo(IConnectionStringProvider connectionStringProvider)
+        {
+            _connectionStringProvider = connectionStringProvider;
+        }
+
+
         public async Task SaveWebRequestLog(WebRequestLog log)
         {
-
-
-            using (IDbConnection dbConnection = new SqlConnection("YourConnectionString"))
+            try
             {
-                // Open the connection
-                dbConnection.Open();
+                using (IDbConnection dbConnection = new SqlConnection(_connectionStringProvider.GetConnectionString()))
+                {
+                    // Open the connection
+                    dbConnection.Open();
 
-                // Insert log entry into the database
-                var sql = @"INSERT INTO LogEntries (Timestamp, Latitude, Longitude) VALUES (@Timestamp, @Latitude, @Longitude)";
-                await dbConnection.ExecuteAsync(sql, log);
+                    // Insert log entry into the database
+                    var sql = @"INSERT INTO WebRequestLog (Timestamp, Latitude, Longitude) VALUES (@Timestamp, @Latitude, @Longitude)";
+                    await dbConnection.ExecuteAsync(sql, log);
+                }
+            }
+            catch (Exception ex)
+            {
+
             }
 
-            throw new NotImplementedException();
+
+
+           
         }
     }
 }

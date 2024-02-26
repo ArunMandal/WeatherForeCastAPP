@@ -28,37 +28,36 @@ namespace WeatherForeCastAPP.Controllers
         [HttpPost]
         public async Task<IActionResult> GetWeatherForecast([FromBody] Location location)
         {
-            var forecast = await _weatherService.GetForecastAsync(location.Latitude, location.Longitude);
-
-            WebRequestLog log = new WebRequestLog
+            try
             {
-                Latitude = location.Latitude,
-                Longitude = location.Longitude,
-                Timestamp = DateTime.Now,
+               
+                var forecast = await _weatherService.GetForecastAsync(location.Latitude, location.Longitude);
 
-            };
+                WebRequestLog log = new WebRequestLog
+                {
+                    Latitude = location.Latitude,
+                    Longitude = location.Longitude,
+                    Timestamp = DateTime.Now,
+                };
 
-            // await  _webRequestLogService.LogRequest(log);
-            
+                await _webRequestLogService.LogRequest(log);
 
-            System.Diagnostics.Debug.WriteLine($"Received location: Latitude = {location.Latitude}, Longitude = {location.Longitude}");
+                System.Diagnostics.Debug.WriteLine($"Received location: Latitude = {location.Latitude}, Longitude = {location.Longitude}");
 
-            // Respond with a success message
-            return Ok(new { message = "Location received successfully!", forecast });
+                // Respond with a success message
+                return Ok(new { message = "Location received successfully!", forecast });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                System.Diagnostics.Debug.WriteLine($"An error occurred: {ex.Message}");
+
+                // Return an error response
+                return StatusCode(500, new { message = "An error occurred while fetching the weather forecast." });
+            }
         }
 
-        private async Task LogRequestAsync(Location location)
-        {
-            // Create a connection to your database
-            //using (IDbConnection dbConnection = new SqlConnection("YourConnectionString"))
-            //{
-            //    // Open the connection
-            //    dbConnection.Open();
 
-            //    // Insert log entry into the database
-            //    var sql = @"INSERT INTO LogEntries (Timestamp, Latitude, Longitude) VALUES (@Timestamp, @Latitude, @Longitude)";
-            //    await dbConnection.ExecuteAsync(sql, new LogEntry { Timestamp = DateTime.Now, Latitude = location.Latitude, Longitude = location.Longitude });
-            //}
-        }
+
     }
 }

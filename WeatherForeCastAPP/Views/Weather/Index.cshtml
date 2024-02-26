@@ -129,17 +129,23 @@
                     if (response.ok) {
                         return response.json();
                     } else {
-                        throw new Error('Network response was not ok.');
+                        // If the response is not ok, parse the error message from the response body
+                        return response.json().then(error => {
+                           // alert(error.message);
+                            throw new Error(error.message || 'Network response was not ok.');
+                        });
                     }
                 })
                 .then(data => {
                     console.log(data.forecast);
-                    renderWeatherCards(data.forecast.periods)             
+                    renderWeatherCards(data.forecast.periods);
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    // Handle the error here, display an alert, or perform any other action
                 });
         }
+
 
         function renderWeatherCards(data) {
             const container = document.getElementById('weather-container');
