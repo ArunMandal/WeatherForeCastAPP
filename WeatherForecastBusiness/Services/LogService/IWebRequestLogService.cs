@@ -9,6 +9,6 @@ namespace WeatherForecastBusiness.Services.LogService
 {
     public interface IWebRequestLogService<T>
     {
-        public Task LogRequest(T location);
+        public Task<Response<T>> LogRequest(T location);
     }
 }

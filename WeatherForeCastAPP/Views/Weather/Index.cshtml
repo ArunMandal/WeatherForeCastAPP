@@ -127,18 +127,20 @@
             })
                 .then(response => {
                     if (response.ok) {
+                        console.log(response)
                         return response.json();
                     } else {
                         // If the response is not ok, parse the error message from the response body
                         return response.json().then(error => {
                            // alert(error.message);
+                            console.log(response)
                             throw new Error(error.message || 'Network response was not ok.');
                         });
                     }
                 })
                 .then(data => {
-                    console.log(data.forecast);
-                    renderWeatherCards(data.forecast.periods);
+                   
+                    renderWeatherCards(data.responseResult.periods);
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -184,7 +186,7 @@
 
 
     </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCO-vNni9H4sbGr2k8VBelcMO7SAqqK_ac&callback=initMap"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOURKEY&callback=initMap"></script>
 
 </body>
 </html>

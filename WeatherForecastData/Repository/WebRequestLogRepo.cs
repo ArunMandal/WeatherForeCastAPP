@@ -23,9 +23,7 @@ namespace WeatherForecastData.Repository
 
         public async Task SaveWebRequestLog(WebRequestLog log)
         {
-            try
-            {
-                using (IDbConnection dbConnection = new SqlConnection(_connectionStringProvider.GetConnectionString()))
+             using (IDbConnection dbConnection = new SqlConnection(_connectionStringProvider.GetConnectionString()))
                 {
                     // Open the connection
                     dbConnection.Open();
@@ -34,14 +32,6 @@ namespace WeatherForecastData.Repository
                     var sql = @"INSERT INTO WebRequestLog (Timestamp, Latitude, Longitude) VALUES (@Timestamp, @Latitude, @Longitude)";
                     await dbConnection.ExecuteAsync(sql, log);
                 }
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-
-
            
         }
     }

@@ -11,10 +11,10 @@ using WeatherForecastData.Model;
 
 namespace WeatherForecastBusiness.Services.WeatherServices
 {
-    public class WeatherService: IWeatherService
+    public class WeatherService : IWeatherService
     {
         private readonly HttpClient _httpClient;
-       
+
         public WeatherService()
         {
             _httpClient = new HttpClient();
@@ -25,61 +25,76 @@ namespace WeatherForecastBusiness.Services.WeatherServices
             _httpClient.BaseAddress = new Uri("https://api.weather.gov");
         }
 
-        public async Task<ForecastResponse> GetForecastAsync(decimal lat, decimal lng)
+        public async Task<Response<ForecastResponse>> GetForecastAsync(decimal lat, decimal lng)
         {
-            //Get the gridpoint information for the given latitude and longitude.
-            var redirectResponseText = await _httpClient.GetAsync($"https://api.weather.gov/points/{lat.ToString("0.####")},{lng.ToString("0.####")}");
-            var cd= await redirectResponseText.Content.ReadAsStringAsync();
-            //Parse the json response
-      
-            dynamic json = JObject.Parse(cd);
-
-            var city = json.properties.relativeLocation.properties.city.Value;
-            var state = json.properties.relativeLocation.properties.state.Value;
-            //Get the forecast Url from the response
-            var forecastUrl = (string)json.properties.forecast;
-
-            //Load the forecast Url
-            var forecastResponseText = await _httpClient.GetAsync(forecastUrl);
-
-            //Parse the json response
-            dynamic json2 = JObject.Parse(await forecastResponseText.Content.ReadAsStringAsync());
-
-            //Instantiate a new ForecastResponse object and fill it with the data received
-            var response = new ForecastResponse()
+            var responseModel = new Response<ForecastResponse>();
+            try
             {
-                Periods = new List<ForecastPeriod>(),
-                ElevationInMeters = json2.properties.elevation.value,
-                LastUpdatedDate = json2.properties.updated,
-                Latitude = lat,
-                Longitude = lng
-            };
+                var redirectResponseText = await _httpClient.GetAsync($"https://api.weather.gov/points/{lat.ToString("0.####")},{lng.ToString("0.####")}");
+                var cd = await redirectResponseText.Content.ReadAsStringAsync();
+                //Parse the json response
 
-            foreach (dynamic p in json2.properties.periods)
-            {
-                response.Periods.Add(new ForecastPeriod()
+                dynamic json = JObject.Parse(cd);
+
+                var city = json.properties.relativeLocation.properties.city.Value;
+                var state = json.properties.relativeLocation.properties.state.Value;
+                //Get the forecast Url from the response
+                var forecastUrl = (string)json.properties.forecast;
+
+                //Load the forecast Url
+                var forecastResponseText = await _httpClient.GetAsync(forecastUrl);
+
+                //Parse the json response
+                dynamic json2 = JObject.Parse(await forecastResponseText.Content.ReadAsStringAsync());
+
+                //Instantiate a new ForecastResponse object and fill it with the data received
+
+                responseModel.ResponseResult = new ForecastResponse()
                 {
-                    Name = p.name,
-                    StartTime = p.startTime,
-                    EndTime = p.endTime,
-                    IsDayTime = p.isDaytime,
-                    TemperatureInFahrenheit = p.temperature,
-                    WindSpeed = p.windSpeed,
-                    WindDirection = p.windDirection,
-                    ForecastShort = p.shortForecast,
-                    ForecastLong = p.detailedForecast
-                });
+                    Periods = new List<ForecastPeriod>(),
+                    ElevationInMeters = json2.properties.elevation.value,
+                    LastUpdatedDate = json2.properties.updated,
+                    Latitude = lat,
+                    Longitude = lng
+                };
+
+                foreach (dynamic p in json2.properties.periods)
+                {
+                    responseModel.ResponseResult.Periods.Add(new ForecastPeriod()
+                    {
+                        Name = p.name,
+                        StartTime = p.startTime,
+                        EndTime = p.endTime,
+                        IsDayTime = p.isDaytime,
+                        TemperatureInFahrenheit = p.temperature,
+                        WindSpeed = p.windSpeed,
+                        WindDirection = p.windDirection,
+                        ForecastShort = p.shortForecast,
+                        ForecastLong = p.detailedForecast
+                    });
+                }
+
+
+                responseModel.ResponseResult.RawData = await forecastResponseText.Content.ReadAsStringAsync();
+               
+                return responseModel;
+            }
+            catch (Exception ex)
+            {
+                responseModel.ErrorMessage = ex.Message;
+                responseModel.Success= false;
+                return responseModel;
             }
 
-            response.RawData = await forecastResponseText.Content.ReadAsStringAsync();
+            //Get the gridpoint information for the given latitude and longitude.
 
-            return response;
+           
         }
 
 
 
-       
+
     }
 
-   
+
 }

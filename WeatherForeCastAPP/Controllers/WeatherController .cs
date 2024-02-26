@@ -33,6 +33,13 @@ namespace WeatherForeCastAPP.Controllers
                
                 var forecast = await _weatherService.GetForecastAsync(location.Latitude, location.Longitude);
 
+
+                if (!forecast.Success)
+                {
+                    return StatusCode(500, new { message = "An error occurred while fetching weather forecast." });
+
+                }
+
                 WebRequestLog log = new WebRequestLog
                 {
                     Latitude = location.Latitude,
@@ -40,12 +47,21 @@ namespace WeatherForeCastAPP.Controllers
                     Timestamp = DateTime.Now,
                 };
 
-                await _webRequestLogService.LogRequest(log);
+                var loggedInDb=await _webRequestLogService.LogRequest(log);
+               
+                if (!loggedInDb.Success)
+                {
+                    return StatusCode(500, new { message = "An error occurred logging in database." });
+
+                }
 
                 System.Diagnostics.Debug.WriteLine($"Received location: Latitude = {location.Latitude}, Longitude = {location.Longitude}");
 
+               
+
+
                 // Respond with a success message
-                return Ok(new { message = "Location received successfully!", forecast });
+                return Ok(new { message = "Location received successfully!", forecast.ResponseResult });
             }
             catch (Exception ex)
             {

@@ -14,11 +14,25 @@ namespace WeatherForecastBusiness.Services.LogService
         public WebRequestLogService(IWebRequestLogRepo webRequestLogRepo) {
             _webRequestLogRepo= webRequestLogRepo;
         }
-        public async Task LogRequest(WebRequestLog location)
+        public async Task<Response<WebRequestLog>> LogRequest(WebRequestLog location)
         {
+            try
+            {
+                await _webRequestLogRepo.SaveWebRequestLog(location);
 
-          await  _webRequestLogRepo.SaveWebRequestLog(location);
-           
+                var result= new Response<WebRequestLog>();
+                result.Success = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                var result = new Response<WebRequestLog>();
+                result.Success = false; 
+                result.ErrorMessage= ex.Message;
+                return result;
+            }
+
+             
         }
     }
 }

@@ -9,6 +9,6 @@ namespace WeatherForecastBusiness.Services.WeatherServices
 {
     public interface IWeatherService
     {
-        public  Task<ForecastResponse> GetForecastAsync(decimal lat, decimal lng);
+        public  Task<Response< ForecastResponse>> GetForecastAsync(decimal lat, decimal lng);
     }
 }
